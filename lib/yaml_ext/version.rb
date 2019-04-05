@@ -1,3 +1,3 @@
-module SchemaRefs
+module YamlExt
   VERSION = "0.1.0"
 end

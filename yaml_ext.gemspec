@@ -1,11 +1,11 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "schema_refs/version"
+require "yaml_ext/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "schema_refs"
-  spec.version       = SchemaRefs::VERSION
+  spec.name          = "yaml_ext"
+  spec.version       = YamlExt::VERSION
   spec.authors       = ["i2bskn"]
   spec.email         = ["i2bskn@gmail.com"]
 
