@@ -1,2 +1,6 @@
 User:
   $ref: ./User.yml
+Users:
+  $ref: ./Users.yml
+Error:
+  $ref: ./Error.yml
