@@ -1,0 +1,13 @@
+summary: Create a user
+operationId: createUsers
+tags:
+  - users
+responses:
+  '201':
+    description: Null response
+  default:
+    description: unexpected error
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Error"

@@ -1,0 +1,25 @@
+get:
+  summary: Info for a specific user
+  operationId: showUserById
+  tags:
+    - users
+  parameters:
+    - name: userId
+      in: path
+      description: The id of the user
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/User"
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"

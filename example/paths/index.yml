@@ -1,0 +1,8 @@
+/users:
+  get:
+    $ref: ./users/list_users.yml
+  post:
+    $ref: ./users/create_users.yml
+/users/{userId}:
+  get:
+    $ref: ./users/show_user_by_id.yml
