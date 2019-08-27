@@ -46,14 +46,17 @@ module YamlExt
         end
       end
 
-      def resolve_ref_inner_json(node, node_tree = nil)
-        node_tree ||= node
+      def resolve_ref_inner_json(node, node_tree = nil, node_path = [])
+        node_tree ||= node.dup
 
         case node
         when Hash
           node.each_with_object({}) { |(k, v), obj|
             if k == "$ref" && v.is_a?(String) && v.start_with?("#/")
+              new_node_path = node_path.dup.push(k)
               value = v.split("/")[1..-1].inject(node_tree) { |nodes, key| nodes.fetch(key) }
+              value = resolve_ref_inner_json(value, node_tree, new_node_path)
+              update_node_tree(node_tree, new_node_path, value)
               case value
               when Hash
                 obj = {} unless obj.is_a?(Hash)
@@ -66,13 +69,24 @@ module YamlExt
               end
             else
               obj = {} unless obj.is_a?(Hash)
-              obj[k] = resolve_ref_inner_json(v, node_tree)
+              obj[k] = resolve_ref_inner_json(v, node_tree, node_path)
             end
           }
         when Array
-          node.map { |n| resolve_ref_inner_json(n, node_tree) }
+          node.map.with_index { |n, i| resolve_ref_inner_json(n, node_tree, node_path.dup.push(i)) }
         else
           node
+        end
+      end
+
+      def update_node_tree(node_tree, node_path, value)
+        content = node_tree
+        node_path.each.with_index(1) do |k, i|
+          if node_path.size > i
+            content = content[k]
+          else
+            content[k] = value
+          end
         end
       end
   end
