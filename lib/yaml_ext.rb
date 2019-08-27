@@ -5,77 +5,76 @@ require "yaml_ext/version"
 module YamlExt
   class << self
     def load(path)
-      resolve_ref_inner_json(load_file(path))
+      parse_nodes(:ref_inner_node, load_with_extended_nodes(path), path)
     end
 
-    def load_file(path)
-      parse_extended_node(load_yaml_file(path), path)
+    def load_with_extended_nodes(path)
+      parse_nodes(:ref_extended_node, load_with_erb(path), path)
+    end
+
+    def load_with_erb(path)
+      YAML.safe_load(ERB.new(File.read(path), trim_mode: "-").result)
     end
 
     private
 
-      def load_yaml_file(path)
-        YAML.safe_load(ERB.new(File.read(path), trim_mode: "-").result)
-      end
+      def parse_nodes(type, node, path, node_tree = nil, node_path = [])
+        node_tree ||= node.dup
 
-      def parse_extended_node(node, path)
         case node
         when Hash
-          node.each_with_object({}) do |(k, v), obj|
-            if k == "$ref" && v.is_a?(String) && !v.start_with?("#/")
-              value = load_file(File.expand_path(v, File.dirname(path)))
-              case value
-              when Hash
-                obj = {} unless obj.is_a?(Hash)
-                obj.merge!(value)
-              when Array
-                obj = [] unless obj.is_a?(Array)
-                obj.concat(value)
-              else
-                obj = value
-              end
-            else
-              obj = {} unless obj.is_a?(Hash)
-              obj[k] = parse_extended_node(v, path)
-            end
-          end
+          send(type, node, path, node_tree, node_path)
         when Array
-          node.map { |n| parse_extended_node(n, path) }
+          node.map.with_index { |n, idx|
+            parse_nodes(type, n, path, node_tree, node_path.dup.push(idx))
+          }
         else
           node
         end
       end
 
-      def resolve_ref_inner_json(node, node_tree = nil, node_path = [])
-        node_tree ||= node.dup
+      def ref_inner_node(node, path, node_tree = nil, node_path = [])
+        node.each_with_object({}) do |(k, v), obj|
+          if k == "$ref" && v.is_a?(String) && v.start_with?("#/")
+            value = v.split("/")[1..-1].inject(node_tree) { |nodes, key| nodes[key] }
+            value = parse_nodes(:ref_inner_node, value, path, node_tree, node_path)
+            update_node_tree(node_tree, node_path, value)
 
-        case node
-        when Hash
-          node.each_with_object({}) do |(k, v), obj|
-            if k == "$ref" && v.is_a?(String) && v.start_with?("#/")
-              new_node_path = node_path.dup.push(k)
-              value = v.split("/")[1..-1].inject(node_tree) { |nodes, key| nodes.fetch(key) }
-              value = resolve_ref_inner_json(value, node_tree, new_node_path)
-              update_node_tree(node_tree, new_node_path, value)
-              case value
-              when Hash
-                obj = {} unless obj.is_a?(Hash)
-                obj.merge!(value)
-              when Array
-                obj = [] unless obj.is_a?(Array)
-                obj.concat(value)
-              else
-                obj = value
-              end
-            else
+            case value
+            when Hash
               obj = {} unless obj.is_a?(Hash)
-              obj[k] = resolve_ref_inner_json(v, node_tree, node_path)
+              obj.merge!(value)
+            when Array
+              obj = [] unless obj.is_a?(Array)
+              obj.concat(value)
+            else
+              obj = value
             end
+          else
+            obj = {} unless obj.is_a?(Hash)
+            obj[k] = parse_nodes(:ref_inner_node, v, path, node_tree, node_path.dup.push(k))
           end
-        when Array
-          node.map.with_index { |n, i| resolve_ref_inner_json(n, node_tree, node_path.dup.push(i)) }
-        else
-          node
+        end
+      end
+
+      def ref_extended_node(node, path, node_tree = nil, node_path = [])
+        node.each_with_object({}) do |(k, v), obj|
+          if k == "$ref" && v.is_a?(String) && !v.start_with?("#/")
+            value = load_with_extended_nodes(File.expand_path(v, File.dirname(path)))
+            case value
+            when Hash
+              obj = {} unless obj.is_a?(Hash)
+              obj.merge!(value)
+            when Array
+              obj = [] unless obj.is_a?(Array)
+              obj.concat(value)
+            else
+              obj = value
+            end
+          else
+            obj = {} unless obj.is_a?(Hash)
+            obj[k] = parse_nodes(:ref_extended_node, v, path, node_tree, node_path.dup.push(k))
+          end
         end
       end
 
@@ -85,7 +84,7 @@ module YamlExt
           if node_path.size > i
             content = content[k]
           else
-            content[k] = value
+            { k => value }
           end
         end
       end
