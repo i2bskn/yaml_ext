@@ -15,13 +15,13 @@ module YamlExt
     private
 
       def load_yaml_file(path)
-        YAML.load(ERB.new(File.read(path), nil, "-").result)
+        YAML.safe_load(ERB.new(File.read(path), trim_mode: "-").result)
       end
 
       def parse_extended_node(node, path)
         case node
         when Hash
-          node.each_with_object({}) { |(k, v), obj|
+          node.each_with_object({}) do |(k, v), obj|
             if k == "$ref" && v.is_a?(String) && !v.start_with?("#/")
               value = load_file(File.expand_path(v, File.dirname(path)))
               case value
@@ -38,7 +38,7 @@ module YamlExt
               obj = {} unless obj.is_a?(Hash)
               obj[k] = parse_extended_node(v, path)
             end
-          }
+          end
         when Array
           node.map { |n| parse_extended_node(n, path) }
         else
@@ -51,7 +51,7 @@ module YamlExt
 
         case node
         when Hash
-          node.each_with_object({}) { |(k, v), obj|
+          node.each_with_object({}) do |(k, v), obj|
             if k == "$ref" && v.is_a?(String) && v.start_with?("#/")
               new_node_path = node_path.dup.push(k)
               value = v.split("/")[1..-1].inject(node_tree) { |nodes, key| nodes.fetch(key) }
@@ -71,7 +71,7 @@ module YamlExt
               obj = {} unless obj.is_a?(Hash)
               obj[k] = resolve_ref_inner_json(v, node_tree, node_path)
             end
-          }
+          end
         when Array
           node.map.with_index { |n, i| resolve_ref_inner_json(n, node_tree, node_path.dup.push(i)) }
         else
