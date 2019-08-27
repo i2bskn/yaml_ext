@@ -1,5 +1,7 @@
 # YamlExt
 
+[![Build Status](https://travis-ci.org/i2bskn/yaml_ext.svg?branch=master)](https://travis-ci.org/i2bskn/yaml_ext)
+
 Multiple YAML Loader.
 
 ## Installation
