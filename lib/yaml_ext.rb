@@ -36,8 +36,9 @@ module YamlExt
       def ref_inner_node(node, path, node_tree = nil, node_path = [])
         node.each_with_object({}) do |(k, v), obj|
           if k == "$ref" && v.is_a?(String) && v.start_with?("#/")
-            value = v.split("/")[1..-1].inject(node_tree) { |nodes, key| nodes[key] }
-            value = parse_nodes(:ref_inner_node, value, path, node_tree, node_path)
+            ref_path = v.split("/")[1..-1]
+            value = ref_path.inject(node_tree) { |nodes, key| nodes[key] }
+            value = parse_nodes(:ref_inner_node, value, path, node_tree, ref_path)
             update_node_tree(node_tree, node_path, value)
 
             case value
@@ -84,7 +85,7 @@ module YamlExt
           if node_path.size > i
             content = content[k]
           else
-            { k => value }
+            content[k] = value
           end
         end
       end
