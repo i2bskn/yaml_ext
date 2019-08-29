@@ -11,14 +11,14 @@ RSpec.describe YamlExt do
   context ".load" do
     let(:expected) {
       {
-        "type"  => "array",
+        "type" => "array",
         "items" => {
           "type" => "object",
           "required" => ["id", "name"],
           "properties" => {
-            "id"   => { "type" => "integer" },
+            "id" => { "type" => "integer" },
             "name" => { "type" => "string" },
-            "tag"  => { "type" => "string" },
+            "tag" => { "type" => "string" },
           },
         },
       }
