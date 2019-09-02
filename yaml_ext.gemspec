@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["i2bskn"]
   spec.email         = ["i2bskn@gmail.com"]
 
-  spec.summary       = "Multiple YAML Loader."
-  spec.description   = "Multiple YAML Loader."
+  spec.summary       = "yaml_ext provide references in YAML."
+  spec.description   = "yaml_ext provide references in YAML."
   spec.homepage      = "https://github.com/i2bskn/yaml_ext"
 
   # Specify which files should be added to the gem when it is released.

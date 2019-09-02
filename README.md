@@ -1,8 +1,9 @@
 # YamlExt
 
+[![Gem Version](https://badge.fury.io/rb/yaml_ext.svg)](https://badge.fury.io/rb/yaml_ext)
 [![Build Status](https://travis-ci.org/i2bskn/yaml_ext.svg?branch=master)](https://travis-ci.org/i2bskn/yaml_ext)
 
-Multiple YAML Loader.
+`yaml_ext` provide references in YAML.
 
 ## Installation
 
@@ -23,7 +24,7 @@ $ bundle install
 ```ruby
 pry(main)> YamlExt.load("example/schema.yml")
 => {"openapi"=>"3.0.0",
- "info"=>{"version"=>"1.0.0", "title"=>"Example API"},
+ "info"=>{"version"=>"1.0.0", "title"=>"Example API", "description"=>2},
  "servers"=>[{"url"=>"http://example.com/v1"}],
  "paths"=>
   {"/users"=>
@@ -36,7 +37,7 @@ pry(main)> YamlExt.load("example/schema.yml")
         {"200"=>
           {"description"=>"A paged array of users",
            "headers"=>{"x-next"=>{"description"=>"A link to the next page of responses", "schema"=>{"type"=>"string"}}},
-           "content"=>{"application/json"=>{"schema"=>{"type"=>"array", "items"=>{"$ref"=>"#/components/schemas/User"}}}}},
+           "content"=>{"application/json"=>{"schema"=>{"type"=>"array", "items"=>{"type"=>"object", "required"=>["id", "name"], "properties"=>{"id"=>{"type"=>"integer"}, "name"=>{"type"=>"string"}, "tag"=>{"type"=>"string"}}}}}}},
          "default"=>{"description"=>"unexpected error", "content"=>{"application/json"=>{"schema"=>{"type"=>"object", "required"=>["code", "message"], "properties"=>{"code"=>{"type"=>"integer"}, "message"=>{"type"=>"string"}}}}}}}},
      "post"=>
       {"summary"=>"Create a user",
