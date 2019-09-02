@@ -46,7 +46,7 @@ Metrics/BlockLength:
 Metrics/PerceivedComplexity:
   Max: 9
 
-CyclomaticComplexity:
+Metrics/CyclomaticComplexity:
   Max: 10
 
 Metrics/LineLength:
